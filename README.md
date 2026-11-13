@@ -125,6 +125,49 @@ print(
 )
 ```
 
+## Mesh Health Checks
+
+`trimesh` includes a batch-friendly health checker for common problems in
+art assets. It checks non-manifold edges, degenerate faces, duplicate vertices,
+UV overlaps, missing texture/material paths, normal orientation, and unusual
+bounding-box scales. Every check reports a severity and a repair suggestion.
+
+```bash
+# inspect one model and print the human-readable report
+trimesh health models/box.STL
+
+# recursively inspect a directory with three workers and write JSON
+trimesh-health models/ --jobs 3 --json health-report.json
+
+# repair fixable issues in place, keeping a backup
+trimesh check models/broken.obj --fix --backup
+
+# batch repair into a separate directory
+trimesh-health assets/ --fix --output-dir repaired/
+```
+
+The human report is printed to stdout. `--json PATH` writes the same batch
+report as JSON (`--json -` writes JSON to stdout and the text report to stderr).
+The command exits nonzero when errors are found; use `--fail-on never` for
+report-only automation.
+
+Repairs are intentionally conservative. Topology, degenerate faces, duplicate
+vertices, and normals are repaired automatically. UV repair re-unwraps the
+mesh into a non-overlapping per-face atlas, so textures must be re-baked
+afterwards. Missing files and suspicious units are never invented or rescaled
+automatically.
+
+The same API is available without the CLI:
+
+```python
+from trimesh import health
+
+report = health.check_file("models/broken.obj")
+fixed_report = health.fix_file("models/broken.obj", backup=True)
+batch = health.check_paths(["models/"], jobs=4)
+print(health.format_report(batch))
+```
+
 ## Features
 
 * Import meshes from binary/ASCII STL, Wavefront OBJ, ASCII OFF, binary/ASCII PLY, GLTF/GLB 2.0, 3MF, XAML, 3DXML, etc.

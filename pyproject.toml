@@ -35,6 +35,7 @@ content-type = "text/markdown"
 
 [project.scripts]
 trimesh = "trimesh:__main__.main"
+trimesh-health = "trimesh.health:main"
 
 [tool.setuptools]
 packages = [

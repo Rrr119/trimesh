@@ -1,7 +1,8 @@
 import argparse
+import sys
 
 
-def main():
+def main(argv=None):
     """
     A simple command line utility for accessing trimesh functions.
 
@@ -14,6 +15,13 @@ def main():
     To print some information about a mesh:
       > trimesh hi.stl --statistics
     """
+    if argv is None:
+        argv = sys.argv[1:]
+    if argv and argv[0] in ("check", "health"):
+        from .health import main as health_main
+
+        return health_main(argv[1:])
+
     from .exchange.load import load
 
     parser = argparse.ArgumentParser()
@@ -27,7 +35,7 @@ def main():
     )
     parser.add_argument("-e", "--export", help="Export a loaded geometry to a new file.")
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if args.file_name is None:
         parser.print_help()
@@ -66,4 +74,4 @@ def interactive(scene):
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
